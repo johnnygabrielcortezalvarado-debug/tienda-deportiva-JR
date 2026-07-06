@@ -1,0 +1,11 @@
+# Ignorar archivos de configuración local
+config.php
+.env
+
+# Ignorar carpetas del editor
+.vscode/
+.idea/
+
+# Ignorar archivos temporales
+*.log
+temp/
