@@ -1,12 +1,15 @@
 FROM php:8.2-apache
 
-# Eliminar el archivo de configuración del evento MPM que causa el choque en Debian/Ubuntu
-RUN rm -f /etc/apache2/mods-enabled/mpm_event.load \
-    && rm -f /etc/apache2/mods-enabled/mpm_event.conf \
+# Desinstalar y purgar completamente mpm_event para evitar conflictos de múltiples MPM en Apache
+RUN apt-get update && apt-get purge -y apache2-mpm-event || true \
+    && apt-get install -y apache2-mpm-prefork || true \
     && a2enmod mpm_prefork
 
-# Instalar extensiones de MySQLi y PDO
+# Instalar las extensiones de MySQLi y PDO
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 
+# Habilitar reescritura de URLs para tu MVC
 RUN a2enmod rewrite
+
+# Copiar el código del proyecto al servidor web
 COPY . /var/www/html/
