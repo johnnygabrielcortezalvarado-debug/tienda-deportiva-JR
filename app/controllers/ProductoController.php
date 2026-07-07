@@ -1,7 +1,6 @@
 <?php
 // ============================================================
-// app/controllers/ProductoController.php
-// Controlador — lógica de negocio para productos
+// app/controllers/ProductoController.php (Versión adaptada)
 // ============================================================
 
 require_once __DIR__ . '/../models/ProductoModel.php';
@@ -9,8 +8,8 @@ require_once __DIR__ . '/../models/CategoriaModel.php';
 
 class ProductoController {
 
-    private ProductoModel  $model;
-    private CategoriaModel $catModel;
+    private $model;
+    private $catModel;
 
     public function __construct() {
         $this->model    = new ProductoModel();
@@ -24,18 +23,21 @@ class ProductoController {
             ? $this->model->buscar($busqueda)
             : $this->model->getAll();
         $stats = $this->model->getStats();
-        require __DIR__ . '/../views/productos/index.php';
+        require_once __DIR__ . '/../views/productos/index.php';
     }
 
     // ── Mostrar formulario de creación ────────────────────
     public function crear(): void {
         $categorias = $this->catModel->getActivas();
-        require __DIR__ . '/../views/productos/crear.php';
+        require_once __DIR__ . '/../views/productos/crear.php';
     }
 
     // ── Guardar nuevo producto ────────────────────────────
     public function guardar(): void {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: index.php?c=productos'); exit; }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') { 
+            header('Location: index.php?c=productos'); 
+            exit; 
+        }
 
         $data = [
             'categoria_id' => (int)($_POST['categoria_id'] ?? 0),
@@ -53,16 +55,17 @@ class ProductoController {
         if (!empty($errores)) {
             $categorias = $this->catModel->getActivas();
             $error = implode('<br>', $errores);
-            require __DIR__ . '/../views/productos/crear.php';
+            require_once __DIR__ . '/../views/productos/crear.php';
             return;
         }
 
         if ($this->model->create($data)) {
             header('Location: index.php?c=productos&msg=creado');
+            exit;
         } else {
             $categorias = $this->catModel->getActivas();
             $error = 'Error al guardar el producto.';
-            require __DIR__ . '/../views/productos/crear.php';
+            require_once __DIR__ . '/../views/productos/crear.php';
         }
     }
 
@@ -71,13 +74,19 @@ class ProductoController {
         $id = (int)($_GET['id'] ?? 0);
         $producto   = $this->model->getById($id);
         $categorias = $this->catModel->getActivas();
-        if (!$producto) { header('Location: index.php?c=productos&msg=noexiste'); exit; }
-        require __DIR__ . '/../views/productos/editar.php';
+        if (!$producto) { 
+            header('Location: index.php?c=productos&msg=noexiste'); 
+            exit; 
+        }
+        require_once __DIR__ . '/../views/productos/editar.php';
     }
 
     // ── Actualizar producto ───────────────────────────────
     public function actualizar(): void {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: index.php?c=productos'); exit; }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') { 
+            header('Location: index.php?c=productos'); 
+            exit; 
+        }
 
         $id   = (int)($_POST['id'] ?? 0);
         $data = [
@@ -97,17 +106,18 @@ class ProductoController {
             $producto   = $this->model->getById($id);
             $categorias = $this->catModel->getActivas();
             $error = implode('<br>', $errores);
-            require __DIR__ . '/../views/productos/editar.php';
+            require_once __DIR__ . '/../views/productos/editar.php';
             return;
         }
 
         if ($this->model->update($id, $data)) {
             header('Location: index.php?c=productos&msg=actualizado');
+            exit;
         } else {
             $producto   = $this->model->getById($id);
             $categorias = $this->catModel->getActivas();
             $error = 'Error al actualizar el producto.';
-            require __DIR__ . '/../views/productos/editar.php';
+            require_once __DIR__ . '/../views/productos/editar.php';
         }
     }
 

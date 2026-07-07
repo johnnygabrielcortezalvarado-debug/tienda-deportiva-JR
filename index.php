@@ -57,6 +57,6 @@ switch ($controlador) {
             'sin_stock'        => $prodStats['sin_stock'],
             'valor_inv'        => $prodStats['valor_inv'],
         ];
-        require BASE_PATH . 'app/views/dashboard.php';
+        require_once BASE_PATH . 'app/views/dashboard.php';
         break;
 }
