@@ -1,17 +1,16 @@
 <?php
 // ============================================================
-// app/models/ProductoModel.php
-// Modelo — acceso y gestión de datos de productos
+// app/models/ProductoModel.php (Versión adaptada a MySQLi)
 // ============================================================
 
 require_once __DIR__ . '/../../config/database.php';
 
 class ProductoModel {
 
-    private PDO $db;
+    private $db;
 
     public function __construct() {
-        $this->db = getConnection();
+        $this->db = getConnection(); // Recibe la conexión mysqli
     }
 
     // ── Obtener todos los productos con nombre de categoría ──
@@ -20,7 +19,8 @@ class ProductoModel {
                 FROM productos p
                 INNER JOIN categorias c ON p.categoria_id = c.id
                 ORDER BY p.nombre ASC";
-        return $this->db->query($sql)->fetchAll();
+        $result = $this->db->query($sql);
+        return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     }
 
     // ── Obtener un producto por ID ────────────────────────
@@ -31,8 +31,10 @@ class ProductoModel {
              INNER JOIN categorias c ON p.categoria_id = c.id
              WHERE p.id = ?"
         );
-        $stmt->execute([$id]);
-        return $stmt->fetch();
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
     }
 
     // ── Buscar productos por nombre ───────────────────────
@@ -45,8 +47,10 @@ class ProductoModel {
              ORDER BY p.nombre ASC"
         );
         $like = "%$termino%";
-        $stmt->execute([$like, $like]);
-        return $stmt->fetchAll();
+        $stmt->bind_param("ss", $like, $like);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     }
 
     // ── Crear producto ────────────────────────────────────
@@ -55,7 +59,8 @@ class ProductoModel {
             "INSERT INTO productos (categoria_id, nombre, descripcion, precio, stock, talla, imagen_url, estado)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
-        return $stmt->execute([
+        $stmt->bind_param(
+            "issdiisi", 
             $data['categoria_id'],
             $data['nombre'],
             $data['descripcion'],
@@ -63,8 +68,9 @@ class ProductoModel {
             $data['stock'],
             $data['talla'],
             $data['imagen_url'],
-            $data['estado'],
-        ]);
+            $data['estado']
+        );
+        return $stmt->execute();
     }
 
     // ── Actualizar producto ───────────────────────────────
@@ -74,7 +80,8 @@ class ProductoModel {
              SET categoria_id=?, nombre=?, descripcion=?, precio=?, stock=?, talla=?, imagen_url=?, estado=?
              WHERE id=?"
         );
-        return $stmt->execute([
+        $stmt->bind_param(
+            "issdiisii", 
             $data['categoria_id'],
             $data['nombre'],
             $data['descripcion'],
@@ -83,22 +90,31 @@ class ProductoModel {
             $data['talla'],
             $data['imagen_url'],
             $data['estado'],
-            $id,
-        ]);
+            $id
+        );
+        return $stmt->execute();
     }
 
     // ── Eliminar producto ─────────────────────────────────
     public function delete(int $id): bool {
         $stmt = $this->db->prepare("DELETE FROM productos WHERE id = ?");
-        return $stmt->execute([$id]);
+        $stmt->bind_param("i", $id);
+        return $stmt->execute();
     }
 
     // ── Estadísticas para el dashboard ───────────────────
     public function getStats(): array {
         $stats = [];
-        $stats['total']      = $this->db->query("SELECT COUNT(*) FROM productos")->fetchColumn();
-        $stats['sin_stock']  = $this->db->query("SELECT COUNT(*) FROM productos WHERE stock = 0")->fetchColumn();
-        $stats['valor_inv']  = $this->db->query("SELECT SUM(precio * stock) FROM productos")->fetchColumn();
+        
+        $resTotal = $this->db->query("SELECT COUNT(*) FROM productos");
+        $stats['total'] = $resTotal ? (int)$resTotal->fetch_row()[0] : 0;
+
+        $resStock = $this->db->query("SELECT COUNT(*) FROM productos WHERE stock = 0");
+        $stats['sin_stock'] = $resStock ? (int)$resStock->fetch_row()[0] : 0;
+
+        $resInv = $this->db->query("SELECT SUM(precio * stock) FROM productos");
+        $stats['valor_inv'] = $resInv ? (float)$resInv->fetch_row()[0] : 0.0;
+
         return $stats;
     }
 }
