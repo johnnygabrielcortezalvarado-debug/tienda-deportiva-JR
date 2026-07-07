@@ -1,6 +1,6 @@
 <?php
 // ============================================================
-// app/models/ProductoModel.php (Versión adaptada a MySQLi)
+// app/models/ProductoModel.php (Versión limpia con MySQLi)
 // ============================================================
 
 require_once __DIR__ . '/../../config/database.php';
@@ -10,10 +10,9 @@ class ProductoModel {
     private $db;
 
     public function __construct() {
-        $this->db = getConnection(); // Recibe la conexión mysqli
+        $this->db = getConnection(); 
     }
 
-    // ── Obtener todos los productos con nombre de categoría ──
     public function getAll(): array {
         $sql = "SELECT p.*, c.nombre AS categoria_nombre
                 FROM productos p
@@ -23,7 +22,6 @@ class ProductoModel {
         return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     }
 
-    // ── Obtener un producto por ID ────────────────────────
     public function getById(int $id): array|false {
         $stmt = $this->db->prepare(
             "SELECT p.*, c.nombre AS categoria_nombre
@@ -37,7 +35,6 @@ class ProductoModel {
         return $result->fetch_assoc();
     }
 
-    // ── Buscar productos por nombre ───────────────────────
     public function buscar(string $termino): array {
         $stmt = $this->db->prepare(
             "SELECT p.*, c.nombre AS categoria_nombre
@@ -53,7 +50,6 @@ class ProductoModel {
         return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     }
 
-    // ── Crear producto ────────────────────────────────────
     public function create(array $data): bool {
         $stmt = $this->db->prepare(
             "INSERT INTO productos (categoria_id, nombre, descripcion, precio, stock, talla, imagen_url, estado)
@@ -73,7 +69,6 @@ class ProductoModel {
         return $stmt->execute();
     }
 
-    // ── Actualizar producto ───────────────────────────────
     public function update(int $id, array $data): bool {
         $stmt = $this->db->prepare(
             "UPDATE productos
@@ -95,17 +90,14 @@ class ProductoModel {
         return $stmt->execute();
     }
 
-    // ── Eliminar producto ─────────────────────────────────
     public function delete(int $id): bool {
         $stmt = $this->db->prepare("DELETE FROM productos WHERE id = ?");
         $stmt->bind_param("i", $id);
         return $stmt->execute();
     }
 
-    // ── Estadísticas para el dashboard ───────────────────
     public function getStats(): array {
         $stats = [];
-        
         $resTotal = $this->db->query("SELECT COUNT(*) FROM productos");
         $stats['total'] = $resTotal ? (int)$resTotal->fetch_row()[0] : 0;
 
