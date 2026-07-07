@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 // Tienda de Ropa Deportiva
 // ============================================================
 
-define('BASE_PATH', dirname(__DIR__) . '/');
+define('BASE_PATH', __DIR__ . '/');
 define('BASE_CSS',  '');
 
 require_once BASE_PATH . 'config/database.php';
