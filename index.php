@@ -2,14 +2,13 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-// =============================================
+
 // ============================================================
-// public/index.php — Punto de entrada y enrutador MVC
-// Tienda de Ropa Deportiva
+// Punto de entrada y enrutador MVC - Tienda de Ropa Deportiva
 // ============================================================
 
 define('BASE_PATH', __DIR__ . '/');
-define('BASE_CSS',  '');
+define('BASE_CSS', '');
 
 require_once BASE_PATH . 'config/database.php';
 require_once BASE_PATH . 'app/models/CategoriaModel.php';
@@ -26,7 +25,7 @@ switch ($controlador) {
     case 'categorias':
         $ctrl = new CategoriaController();
         switch ($accion) {
-            case 'crear':    $ctrl->crear();    break;
+            case 'crear':      $ctrl->crear();      break;
             case 'guardar':  $ctrl->guardar();  break;
             case 'editar':   $ctrl->editar();   break;
             case 'actualizar': $ctrl->actualizar(); break;
@@ -38,7 +37,7 @@ switch ($controlador) {
     case 'productos':
         $ctrl = new ProductoController();
         switch ($accion) {
-            case 'crear':    $ctrl->crear();    break;
+            case 'crear':      $ctrl->crear();      break;
             case 'guardar':  $ctrl->guardar();  break;
             case 'editar':   $ctrl->editar();   break;
             case 'actualizar': $ctrl->actualizar(); break;
