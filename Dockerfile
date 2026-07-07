@@ -1,15 +1,12 @@
-FROM php:8.2-apache
+FROM php:8.2-cli
 
-# Habilitar extensión mysqli de forma directa
+# Instalar la extensión mysqli y pdo necesarias para tu base de datos
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 
-# Habilitar mod_rewrite para tu MVC
-RUN a2enmod rewrite
+# Copiar todo tu proyecto al contenedor
+COPY . /app
+WORKDIR /app
 
-# Ajustar el DocumentRoot o copiar archivos limpiamente
-COPY . /var/www/html/
-
-# Configurar Apache para escuchar en el puerto dinámico de Railway y evitar errores MPM
-RUN sed -i -e 's/80/83/g' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf 2>/dev/null || true
-ENV PORT=80
-RUN sed -i -e 's/83/${PORT}/g' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf 2>/dev/null || true
+# Exponer el puerto que asigna Railway e iniciar el servidor embebido de PHP
+EXPOSE 8080
+CMD ["php", "-S", "0.0.0.0:8080", "index.php"]
